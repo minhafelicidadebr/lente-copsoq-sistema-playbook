@@ -16,6 +16,7 @@ import ResultsMTRF from "./pages/copsoq/q1/ResultsMTRF";
 import EducarTrilhas from "./pages/copsoq/q1/EducarTrilhas";
 import TransformarBacklog from "./pages/copsoq/q1/TransformarBacklog";
 import EvoluirESG from "./pages/copsoq/q1/EvoluirESG";
+import MTRFWebDeck from "./pages/metodologia/MTRFWebDeck";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,8 @@ const App = () => (
             <Route path="transformar/backlog" element={<TransformarBacklog />} />
             <Route path="evoluir/esg" element={<EvoluirESG />} />
           </Route>
+          {/* Metodologia WebDeck — isolated route */}
+          <Route path="/metodologia/mtrf" element={<MTRFWebDeck />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
