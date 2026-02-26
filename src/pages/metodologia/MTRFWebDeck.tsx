@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -131,7 +132,7 @@ export default function MTRFWebDeck() {
             </p>
             <div className="flex flex-wrap gap-3">
               <CTA label="Agendar Demonstração (30 min)" onClick={() => setFormOpen(true)} />
-              <CTA label="Demo do Dashboard" variant="secondary" onClick={() => navigateTo("s15-demo-dashboard")} />
+              <CTA label="Entrar no Dashboard" variant="secondary" onClick={() => window.location.href = "/copsoq/q1/results/overview"} />
             </div>
             <TrustBadges items={["Sem exposição individual", "minCellSize aplicado", "Trilha auditável", "WCAG 2.2 AA"]} />
           </div>
@@ -394,7 +395,7 @@ export default function MTRFWebDeck() {
             <p className="text-[hsl(210_20%_70%)] mb-8 text-base">Evidência, execução e rastreabilidade — comece agora.</p>
             <div className="flex flex-wrap gap-3 justify-center mb-6">
               <CTA label="Agendar Demonstração" onClick={() => setFormOpen(true)} />
-              <CTA label="Demo do Dashboard" variant="secondary" onClick={() => navigateTo("s15-demo-dashboard")} />
+              <CTA label="Entrar no Dashboard" variant="secondary" onClick={() => window.location.href = "/copsoq/q1/results/overview"} />
               <CTA label="Simular investimento" variant="secondary" onClick={() => navigateTo("s16-simulador-preco")} />
             </div>
             <TrustBadges items={["Sem exposição individual", "minCellSize aplicado", "Trilha auditável"]} />
@@ -416,7 +417,7 @@ export default function MTRFWebDeck() {
               </div>
             </GlassCard>
             <div className="flex flex-wrap gap-3">
-              <CTA label="Entrar na Demo" onClick={() => navigateTo("s01-hero")} />
+              <CTA label="Entrar no Dashboard" onClick={() => window.location.href = "/copsoq/q1/results/overview"} />
               <CTA label="O que você verá" variant="secondary" onClick={() => openModal("modal-demo-o-que-ver")} />
             </div>
           </div>

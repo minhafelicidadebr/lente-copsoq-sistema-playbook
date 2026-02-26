@@ -27,8 +27,8 @@ export default function ConversionRail({ onOpenDemo, onOpenForm, onNavigate }: C
       <Button onClick={onOpenForm} size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg gap-2">
         <Calendar size={14} /> Agendar demo
       </Button>
-      <Button onClick={onOpenDemo} size="sm" variant="outline" className="bg-[hsl(210_25%_8%/0.8)] backdrop-blur border-[hsl(210_20%_18%)] text-[hsl(210_20%_95%)] gap-2">
-        <BarChart3 size={14} /> Demo dashboard
+      <Button onClick={() => window.location.href = "/copsoq/q1/results/overview"} size="sm" variant="outline" className="bg-[hsl(210_25%_8%/0.8)] backdrop-blur border-[hsl(210_20%_18%)] text-[hsl(210_20%_95%)] gap-2">
+        <BarChart3 size={14} /> Dashboard
       </Button>
       <Button onClick={() => onNavigate("s16-simulador-preco")} size="sm" variant="outline" className="bg-[hsl(210_25%_8%/0.8)] backdrop-blur border-[hsl(210_20%_18%)] text-[hsl(210_20%_95%)] gap-2">
         <DollarSign size={14} /> Simular preço

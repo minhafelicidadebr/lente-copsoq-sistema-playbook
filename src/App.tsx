@@ -27,7 +27,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<MTRFWebDeck />} />
           {/* Q1 COPSOQ Module — isolated namespace */}
           <Route path="/copsoq/q1" element={<CopsoqLayout />}>
             <Route path="overview" element={<Overview />} />
