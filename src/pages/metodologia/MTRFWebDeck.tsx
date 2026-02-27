@@ -425,15 +425,13 @@ export default function MTRFWebDeck() {
 
         {/* S16 — SIMULADOR DE PREÇO */}
         <SlideShell id="s16-simulador-preco" variant="dark">
-          <div className="max-w-2xl mx-auto w-full">
-            <Badge className="bg-accent/20 text-accent border-accent/30 mb-6 text-xs">Simulador SaaS</Badge>
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">Simulador de investimento</h2>
-            <p className="text-[hsl(210_20%_60%)] mb-6 text-xs">Estimativa orientativa — sem "números mágicos". Faixas configuráveis (TBD).</p>
-            <GlassCard>
-              <PricingSimulator onRequestProposal={() => setFormOpen(true)} />
-            </GlassCard>
-            <div className="mt-4">
-              <button onClick={() => openModal("modal-preco-metodo")} className="text-xs text-[hsl(210_20%_50%)] hover:text-[hsl(210_20%_80%)] hover:underline flex items-center gap-1">
+          <div className="max-w-5xl mx-auto w-full">
+            <Badge className="bg-accent/20 text-accent border-accent/30 mb-4 text-xs">Simulador SaaS</Badge>
+            <h2 className="text-2xl md:text-3xl font-bold mb-1">Simule seu investimento</h2>
+            <p className="text-[hsl(210_20%_55%)] mb-6 text-xs">Preço por pessoa com descontos progressivos por volume. Transparente e sem surpresas.</p>
+            <PricingSimulator onRequestProposal={() => setFormOpen(true)} />
+            <div className="mt-4 text-center">
+              <button onClick={() => openModal("modal-preco-metodo")} className="text-xs text-[hsl(210_20%_50%)] hover:text-[hsl(210_20%_80%)] hover:underline inline-flex items-center gap-1">
                 <Eye size={12} /> Como calculamos (transparência)
               </button>
             </div>

@@ -1,175 +1,464 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AlertTriangle } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import {
+  CheckCircle2, X, Zap, Crown, Rocket, Users, TrendingDown,
+  ArrowRight, ShieldCheck, Sparkles, BarChart3, Info
+} from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip,
+  ResponsiveContainer, Cell, CartesianGrid
+} from "recharts";
 
-const SEGMENTOS = [
-  { value: "empresa", label: "Empresa" },
-  { value: "educacao", label: "Educação" },
-  { value: "governo", label: "Governo" },
-  { value: "hospitalar", label: "Hospitalar" },
-  { value: "osc", label: "OSC" },
-  { value: "comunidade", label: "Comunidade" },
+/* ── CONFIG-DRIVEN PRICING ── */
+const PLANS = [
+  {
+    id: "core",
+    name: "Core",
+    tagline: "Mensurar + Resultados",
+    icon: <Zap size={22} />,
+    color: "hsl(210 75% 60%)",
+    colorClass: "text-cycle-mensurar",
+    borderClass: "border-cycle-mensurar/40",
+    bgClass: "bg-cycle-mensurar/10",
+    glowClass: "shadow-[0_0_30px_hsl(210_75%_60%/0.15)]",
+    basePerPerson: 12.9,
+    features: [
+      { label: "COPSOQ III — survey + chatbot EliAs", included: true },
+      { label: "Dashboard de riscos psicossociais", included: true },
+      { label: "MTR-F (Matriz Risco-Florescimento)", included: true },
+      { label: "Relatório agregado por segmento", included: true },
+      { label: "Trilhas Educar (microlearning)", included: false },
+      { label: "Backlog de intervenções (ILI)", included: false },
+      { label: "Relatório ESG trimestral", included: false },
+      { label: "QBR + re-medição + governança", included: false },
+      { label: "CS dedicado + integrações", included: false },
+    ],
+    cta: "Começar com Core",
+  },
+  {
+    id: "growth",
+    name: "Growth",
+    tagline: "Core + Educar + Transformar",
+    icon: <Rocket size={22} />,
+    color: "hsl(38 85% 55%)",
+    colorClass: "text-accent",
+    borderClass: "border-accent/40",
+    bgClass: "bg-accent/10",
+    glowClass: "shadow-[0_0_30px_hsl(38_85%_55%/0.15)]",
+    basePerPerson: 24.9,
+    popular: true,
+    features: [
+      { label: "COPSOQ III — survey + chatbot EliAs", included: true },
+      { label: "Dashboard de riscos psicossociais", included: true },
+      { label: "MTR-F (Matriz Risco-Florescimento)", included: true },
+      { label: "Relatório agregado por segmento", included: true },
+      { label: "Trilhas Educar (microlearning)", included: true },
+      { label: "Backlog de intervenções (ILI)", included: true },
+      { label: "Relatório ESG trimestral", included: false },
+      { label: "QBR + re-medição + governança", included: false },
+      { label: "CS dedicado + integrações", included: false },
+    ],
+    cta: "Escolher Growth",
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    tagline: "Full Stack + Evoluir + ESG + CS",
+    icon: <Crown size={22} />,
+    color: "hsl(174 65% 45%)",
+    colorClass: "text-primary",
+    borderClass: "border-primary/40",
+    bgClass: "bg-primary/10",
+    glowClass: "shadow-[0_0_30px_hsl(174_65%_45%/0.15)]",
+    basePerPerson: 39.9,
+    features: [
+      { label: "COPSOQ III — survey + chatbot EliAs", included: true },
+      { label: "Dashboard de riscos psicossociais", included: true },
+      { label: "MTR-F (Matriz Risco-Florescimento)", included: true },
+      { label: "Relatório agregado por segmento", included: true },
+      { label: "Trilhas Educar (microlearning)", included: true },
+      { label: "Backlog de intervenções (ILI)", included: true },
+      { label: "Relatório ESG trimestral", included: true },
+      { label: "QBR + re-medição + governança", included: true },
+      { label: "CS dedicado + integrações", included: true },
+    ],
+    cta: "Falar com Especialista",
+  },
+] as const;
+
+/* Volume discount tiers */
+const DISCOUNT_TIERS = [
+  { min: 0, max: 100, discount: 0, label: "Até 100" },
+  { min: 101, max: 300, discount: 0.10, label: "101–300" },
+  { min: 301, max: 500, discount: 0.15, label: "301–500" },
+  { min: 501, max: 1000, discount: 0.22, label: "501–1.000" },
+  { min: 1001, max: 2000, discount: 0.30, label: "1.001–2.000" },
+  { min: 2001, max: 5000, discount: 0.38, label: "2.001–5.000" },
+  { min: 5001, max: 10000, discount: 0.45, label: "5.001+" },
 ];
 
-const PORTES = [
-  { value: "ate_100", label: "Até 100 colaboradores" },
-  { value: "101_500", label: "101–500" },
-  { value: "501_2000", label: "501–2.000" },
-  { value: "2000_plus", label: "2.000+" },
-];
+function getDiscount(count: number) {
+  return DISCOUNT_TIERS.find(t => count >= t.min && count <= t.max)
+    ?? DISCOUNT_TIERS[DISCOUNT_TIERS.length - 1];
+}
 
-const MODALIDADES = [
-  { value: "sprint_90_dias", label: "Sprint 90 dias" },
-  { value: "programa_anual", label: "Programa Anual (12 meses)" },
-];
+function formatBRL(v: number) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
+}
 
-const COMPLETUDES = [
-  { value: "core", label: "Core (Mensurar + Resultados)" },
-  { value: "core_plus", label: "Core+ (+ Educar + Transformar)" },
-  { value: "full_stack", label: "Full Stack (+ Evoluir + ESG)" },
-];
-
-const ADDONS = [
-  { id: "sso", label: "SSO / SAML" },
-  { id: "integracoes", label: "Integrações (ERP/HCM)" },
-  { id: "multiunidade", label: "Multiunidade" },
-  { id: "relatorios_avancados", label: "Relatórios avançados" },
-  { id: "cs_dedicado", label: "CS dedicado" },
-];
+/* Slider marks for display */
+const SLIDER_MARKS = [50, 100, 300, 500, 1000, 2000, 5000, 10000];
+function sliderToCount(val: number) {
+  // Map 0-100 slider to exponential 10–10000
+  return Math.round(10 * Math.pow(10, (val / 100) * 3));
+}
+function countToSlider(count: number) {
+  return (Math.log10(count / 10) / 3) * 100;
+}
 
 interface PricingSimulatorProps {
   onRequestProposal: () => void;
 }
 
 export default function PricingSimulator({ onRequestProposal }: PricingSimulatorProps) {
-  const [segmento, setSegmento] = useState("");
-  const [porte, setPorte] = useState("");
-  const [modalidade, setModalidade] = useState("");
-  const [completude, setCompletude] = useState("");
-  const [addons, setAddons] = useState<string[]>([]);
-  const [simulated, setSimulated] = useState(false);
+  const [headcount, setHeadcount] = useState(250);
+  const [selectedPlan, setSelectedPlan] = useState<string>("growth");
+  const [isAnnual, setIsAnnual] = useState(true);
 
-  const toggleAddon = (id: string) => {
-    setAddons(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]);
-  };
+  const sliderVal = useMemo(() => countToSlider(headcount), [headcount]);
 
-  const isComplete = segmento && porte && modalidade && completude;
+  const handleSlider = useCallback((val: number[]) => {
+    const count = sliderToCount(val[0]);
+    setHeadcount(Math.min(10000, Math.max(10, count)));
+  }, []);
+
+  const tier = useMemo(() => getDiscount(headcount), [headcount]);
+
+  const prices = useMemo(() => {
+    const annualMultiplier = isAnnual ? 0.85 : 1; // 15% off annual
+    return PLANS.map(plan => {
+      const base = plan.basePerPerson;
+      const afterVolume = base * (1 - tier.discount);
+      const final = afterVolume * annualMultiplier;
+      const monthly = final * headcount;
+      const savings = (base * headcount) - monthly;
+      return {
+        planId: plan.id,
+        perPerson: final,
+        monthly,
+        annual: monthly * 12,
+        savings,
+        discountPct: Math.round((1 - final / base) * 100),
+      };
+    });
+  }, [headcount, tier, isAnnual]);
+
+  const chartData = useMemo(() => {
+    return PLANS.map((plan, i) => ({
+      name: plan.name,
+      investimento: Math.round(prices[i].monthly),
+      color: plan.color,
+    }));
+  }, [prices]);
+
+  const savingsChartData = useMemo(() => {
+    return DISCOUNT_TIERS.map(t => ({
+      name: t.label,
+      desconto: Math.round(t.discount * 100),
+      active: headcount >= t.min && headcount <= t.max,
+    }));
+  }, [headcount]);
+
+  const selectedPrice = prices.find(p => p.planId === selectedPlan)!;
+  const selectedPlanObj = PLANS.find(p => p.id === selectedPlan)!;
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-[hsl(210_20%_70%)]">Segmento</label>
-          <Select value={segmento} onValueChange={setSegmento}>
-            <SelectTrigger className="bg-[hsl(210_20%_15%)] border-[hsl(210_20%_22%)] text-[hsl(210_20%_95%)]">
-              <SelectValue placeholder="Tipo de organização" />
-            </SelectTrigger>
-            <SelectContent>
-              {SEGMENTOS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-[hsl(210_20%_70%)]">Porte</label>
-          <Select value={porte} onValueChange={setPorte}>
-            <SelectTrigger className="bg-[hsl(210_20%_15%)] border-[hsl(210_20%_22%)] text-[hsl(210_20%_95%)]">
-              <SelectValue placeholder="Nº de colaboradores" />
-            </SelectTrigger>
-            <SelectContent>
-              {PORTES.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-[hsl(210_20%_70%)]">Modalidade</label>
-          <Select value={modalidade} onValueChange={setModalidade}>
-            <SelectTrigger className="bg-[hsl(210_20%_15%)] border-[hsl(210_20%_22%)] text-[hsl(210_20%_95%)]">
-              <SelectValue placeholder="Sprint ou Anual" />
-            </SelectTrigger>
-            <SelectContent>
-              {MODALIDADES.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-[hsl(210_20%_70%)]">Completude</label>
-          <Select value={completude} onValueChange={setCompletude}>
-            <SelectTrigger className="bg-[hsl(210_20%_15%)] border-[hsl(210_20%_22%)] text-[hsl(210_20%_95%)]">
-              <SelectValue placeholder="Módulos inclusos" />
-            </SelectTrigger>
-            <SelectContent>
-              {COMPLETUDES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-8">
+      {/* ── HEADLINE ── */}
+      <div className="text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-flex items-center gap-2 mb-4"
+        >
+          <Sparkles className="text-accent" size={18} />
+          <span className="text-xs font-semibold tracking-widest uppercase text-accent">
+            Investimento por pessoa · transparente
+          </span>
+        </motion.div>
+        <h3 className="text-2xl md:text-3xl font-bold mb-2">
+          Quanto custa cuidar de{" "}
+          <span className="text-gradient-primary">{headcount.toLocaleString("pt-BR")}</span>{" "}
+          pessoas?
+        </h3>
+        <p className="text-xs text-[hsl(210_20%_55%)] max-w-lg mx-auto">
+          Deslize para ajustar o número de colaboradores. Descontos progressivos aplicados automaticamente.
+        </p>
       </div>
 
-      <div className="space-y-3">
-        <label className="text-xs font-medium text-[hsl(210_20%_70%)]">Add-ons (opcionais)</label>
-        <div className="flex flex-wrap gap-3">
-          {ADDONS.map(a => (
-            <label key={a.id} className="flex items-center gap-2 cursor-pointer">
-              <Checkbox
-                checked={addons.includes(a.id)}
-                onCheckedChange={() => toggleAddon(a.id)}
-                className="border-[hsl(210_20%_30%)]"
-              />
-              <span className="text-xs text-[hsl(210_20%_80%)]">{a.label}</span>
-            </label>
+      {/* ── SLIDER ── */}
+      <div className="space-y-4 px-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users size={16} className="text-primary" />
+            <span className="text-sm font-medium">Colaboradores</span>
+          </div>
+          <motion.div
+            key={headcount}
+            initial={{ scale: 1.15, opacity: 0.7 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex items-center gap-2"
+          >
+            <span className="text-2xl font-bold text-gradient-primary tabular-nums">
+              {headcount.toLocaleString("pt-BR")}
+            </span>
+            {tier.discount > 0 && (
+              <Badge className="bg-copsoq-salus/20 text-copsoq-salus border-copsoq-salus/30 text-[10px] gap-1">
+                <TrendingDown size={10} /> -{Math.round(tier.discount * 100)}% vol.
+              </Badge>
+            )}
+          </motion.div>
+        </div>
+        <Slider
+          value={[sliderVal]}
+          onValueChange={handleSlider}
+          min={0}
+          max={100}
+          step={0.5}
+          className="w-full [&_[role=slider]]:bg-accent [&_[role=slider]]:border-accent [&_[role=slider]]:shadow-[0_0_12px_hsl(38_85%_55%/0.4)] [&_[role=slider]]:h-5 [&_[role=slider]]:w-5"
+          aria-label="Número de colaboradores"
+        />
+        <div className="flex justify-between text-[10px] text-[hsl(210_20%_40%)] px-1">
+          {SLIDER_MARKS.map(m => (
+            <span key={m} className={headcount >= m ? "text-accent font-semibold" : ""}>{m >= 1000 ? `${m/1000}k` : m}</span>
           ))}
         </div>
       </div>
 
-      <Button
-        onClick={() => setSimulated(true)}
-        disabled={!isComplete}
-        className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-      >
-        Simular faixa de investimento
-      </Button>
+      {/* ── BILLING TOGGLE ── */}
+      <div className="flex items-center justify-center gap-3">
+        <button
+          onClick={() => setIsAnnual(false)}
+          className={`text-xs px-3 py-1.5 rounded-full transition-all ${!isAnnual ? "bg-accent text-accent-foreground font-semibold" : "text-[hsl(210_20%_55%)] hover:text-[hsl(210_20%_80%)]"}`}
+        >
+          Mensal
+        </button>
+        <button
+          onClick={() => setIsAnnual(true)}
+          className={`text-xs px-3 py-1.5 rounded-full transition-all flex items-center gap-1 ${isAnnual ? "bg-accent text-accent-foreground font-semibold" : "text-[hsl(210_20%_55%)] hover:text-[hsl(210_20%_80%)]"}`}
+        >
+          Anual
+          <Badge className="bg-copsoq-salus/20 text-copsoq-salus border-copsoq-salus/30 text-[9px] ml-1">-15%</Badge>
+        </button>
+      </div>
 
-      {simulated && isComplete && (
+      {/* ── PLAN CARDS ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {PLANS.map((plan, i) => {
+          const price = prices[i];
+          const isSelected = selectedPlan === plan.id;
+          return (
+            <motion.button
+              key={plan.id}
+              onClick={() => setSelectedPlan(plan.id)}
+              whileHover={{ y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              className={`
+                relative text-left rounded-2xl p-5 border transition-all duration-300 cursor-pointer
+                ${isSelected
+                  ? `${plan.borderClass} ${plan.bgClass} ${plan.glowClass}`
+                  : "border-[hsl(210_20%_18%)] bg-[hsl(210_25%_10%/0.4)] hover:border-[hsl(210_20%_25%)]"
+                }
+              `}
+              aria-pressed={isSelected}
+              aria-label={`Plano ${plan.name}: ${formatBRL(price.perPerson)} por pessoa/mês`}
+            >
+              {"popular" in plan && plan.popular && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-accent text-accent-foreground text-[10px] font-bold shadow-lg gap-1">
+                    <Sparkles size={10} /> Mais popular
+                  </Badge>
+                </div>
+              )}
+              <div className={`${plan.colorClass} mb-3`}>{plan.icon}</div>
+              <h4 className="font-bold text-base mb-0.5">{plan.name}</h4>
+              <p className="text-[10px] text-[hsl(210_20%_55%)] mb-4">{plan.tagline}</p>
+
+              <div className="mb-4">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`${price.perPerson}-${plan.id}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <span className={`text-3xl font-bold ${plan.colorClass}`}>
+                      {formatBRL(price.perPerson)}
+                    </span>
+                    <span className="text-xs text-[hsl(210_20%_50%)]"> /pessoa/mês</span>
+                  </motion.div>
+                </AnimatePresence>
+                {price.discountPct > 0 && (
+                  <p className="text-[10px] text-copsoq-salus mt-1">
+                    {price.discountPct}% de economia aplicada
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2 mb-4">
+                {plan.features.map(f => (
+                  <div key={f.label} className={`flex items-start gap-2 text-[11px] ${f.included ? "text-[hsl(210_20%_80%)]" : "text-[hsl(210_20%_35%)]"}`}>
+                    {f.included
+                      ? <CheckCircle2 size={13} className={`${plan.colorClass} shrink-0 mt-0.5`} />
+                      : <X size={13} className="shrink-0 mt-0.5 opacity-40" />
+                    }
+                    <span className={!f.included ? "line-through opacity-50" : ""}>{f.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className={`w-full py-2 rounded-lg text-center text-xs font-semibold transition-colors ${
+                isSelected
+                  ? `${plan.bgClass} ${plan.colorClass}`
+                  : "bg-[hsl(210_20%_15%)] text-[hsl(210_20%_55%)]"
+              }`}>
+                {isSelected ? "✓ Selecionado" : "Selecionar"}
+              </div>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* ── RESULT PANEL ── */}
+      <AnimatePresence mode="wait">
         <motion.div
+          key={`${selectedPlan}-${headcount}-${isAnnual}`}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-accent/30 bg-accent/5 p-6 space-y-4"
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3 }}
+          className={`rounded-2xl border p-6 space-y-5 ${selectedPlanObj.borderClass} ${selectedPlanObj.bgClass}`}
+          role="region"
+          aria-live="polite"
+          aria-label="Resumo da simulação"
         >
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="text-accent mt-0.5 shrink-0" size={18} />
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-accent">Faixa estimativa (TBD)</p>
-              <p className="text-xs text-[hsl(210_20%_70%)]">
-                As faixas de preço ainda não estão configuradas (TBD). A proposta final depende de escopo, integrações e governança, e será validada na demonstração.
-              </p>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p className="text-xs text-[hsl(210_20%_55%)] mb-1">Plano {selectedPlanObj.name} · {headcount.toLocaleString("pt-BR")} pessoas · {isAnnual ? "Anual" : "Mensal"}</p>
+              <div className="flex items-baseline gap-2">
+                <span className={`text-3xl font-bold ${selectedPlanObj.colorClass}`}>{formatBRL(selectedPrice.monthly)}</span>
+                <span className="text-sm text-[hsl(210_20%_55%)]">/mês</span>
+              </div>
+              {selectedPrice.savings > 0 && (
+                <p className="text-xs text-copsoq-salus mt-1 flex items-center gap-1">
+                  <TrendingDown size={12} /> Economia de {formatBRL(selectedPrice.savings)}/mês vs. preço base
+                </p>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] text-[hsl(210_20%_45%)]">investimento anual</p>
+              <p className="text-lg font-bold">{formatBRL(selectedPrice.annual)}</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="border-[hsl(210_20%_22%)] text-[hsl(210_20%_80%)] text-[11px]">{SEGMENTOS.find(s => s.value === segmento)?.label}</Badge>
-            <Badge variant="outline" className="border-[hsl(210_20%_22%)] text-[hsl(210_20%_80%)] text-[11px]">{PORTES.find(p => p.value === porte)?.label}</Badge>
-            <Badge variant="outline" className="border-[hsl(210_20%_22%)] text-[hsl(210_20%_80%)] text-[11px]">{MODALIDADES.find(m => m.value === modalidade)?.label}</Badge>
-            <Badge variant="outline" className="border-[hsl(210_20%_22%)] text-[hsl(210_20%_80%)] text-[11px]">{COMPLETUDES.find(c => c.value === completude)?.label}</Badge>
-            {addons.map(a => (
-              <Badge key={a} variant="outline" className="border-accent/30 text-accent text-[11px]">+{ADDONS.find(x => x.id === a)?.label}</Badge>
-            ))}
+          {/* Mini chart — monthly by plan */}
+          <div className="rounded-xl bg-[hsl(210_25%_8%/0.5)] p-4">
+            <p className="text-[10px] text-[hsl(210_20%_50%)] mb-3 flex items-center gap-1">
+              <BarChart3 size={11} /> Comparativo mensal entre planos ({headcount.toLocaleString("pt-BR")} pessoas)
+            </p>
+            <ResponsiveContainer width="100%" height={120}>
+              <BarChart data={chartData} barSize={32}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(210 20% 18%)" />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(210 20% 55%)" }} axisLine={false} tickLine={false} />
+                <YAxis hide />
+                <ReTooltip
+                  contentStyle={{
+                    background: "hsl(210 25% 12%)",
+                    border: "1px solid hsl(210 20% 22%)",
+                    borderRadius: 8,
+                    fontSize: 11,
+                    color: "hsl(210 20% 90%)"
+                  }}
+                  formatter={(v: number) => formatBRL(v)}
+                />
+                <Bar dataKey="investimento" radius={[6, 6, 0, 0]}>
+                  {chartData.map((entry, idx) => (
+                    <Cell
+                      key={idx}
+                      fill={entry.color}
+                      opacity={PLANS[idx].id === selectedPlan ? 1 : 0.3}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
-          <p className="text-[10px] text-[hsl(210_20%_50%)] italic">
-            Estimativa orientativa. A proposta final depende de escopo, integrações e governança. Validada na demonstração.
-          </p>
+          {/* Volume discount chart */}
+          <div className="rounded-xl bg-[hsl(210_25%_8%/0.5)] p-4">
+            <p className="text-[10px] text-[hsl(210_20%_50%)] mb-3 flex items-center gap-1">
+              <TrendingDown size={11} /> Escala de descontos por volume
+            </p>
+            <ResponsiveContainer width="100%" height={90}>
+              <BarChart data={savingsChartData} barSize={20}>
+                <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(210 20% 45%)" }} axisLine={false} tickLine={false} />
+                <YAxis hide />
+                <ReTooltip
+                  contentStyle={{
+                    background: "hsl(210 25% 12%)",
+                    border: "1px solid hsl(210 20% 22%)",
+                    borderRadius: 8,
+                    fontSize: 11,
+                    color: "hsl(210 20% 90%)"
+                  }}
+                  formatter={(v: number) => `${v}%`}
+                />
+                <Bar dataKey="desconto" radius={[4, 4, 0, 0]}>
+                  {savingsChartData.map((entry, idx) => (
+                    <Cell
+                      key={idx}
+                      fill={entry.active ? "hsl(152 60% 42%)" : "hsl(210 20% 22%)"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
 
-          <Button onClick={onRequestProposal} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-            Solicitar proposta com base na simulação
+          {/* Badges */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="border-[hsl(210_20%_22%)] text-[hsl(210_20%_70%)] text-[10px] gap-1">
+              <ShieldCheck size={10} /> Sem exposição individual
+            </Badge>
+            <Badge variant="outline" className="border-[hsl(210_20%_22%)] text-[hsl(210_20%_70%)] text-[10px] gap-1">
+              <ShieldCheck size={10} /> LGPD by design
+            </Badge>
+            <Badge variant="outline" className="border-[hsl(210_20%_22%)] text-[hsl(210_20%_70%)] text-[10px] gap-1">
+              <ShieldCheck size={10} /> Audit-ready
+            </Badge>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-[hsl(210_25%_8%/0.5)] border border-[hsl(210_20%_16%)]">
+            <Info size={14} className="text-[hsl(210_20%_45%)] shrink-0 mt-0.5" />
+            <p className="text-[10px] text-[hsl(210_20%_45%)] leading-relaxed">
+              Estimativa orientativa. Valores por pessoa/mês sujeitos a ajuste conforme escopo, integrações, governança e negociação. A proposta final é validada na demonstração.
+            </p>
+          </div>
+
+          {/* CTA */}
+          <Button
+            onClick={onRequestProposal}
+            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold h-12 text-sm gap-2 shadow-lg shadow-accent/20"
+          >
+            Solicitar proposta personalizada <ArrowRight size={16} />
           </Button>
         </motion.div>
-      )}
+      </AnimatePresence>
     </div>
   );
 }
