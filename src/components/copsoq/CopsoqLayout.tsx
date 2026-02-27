@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
 import {
   ShieldCheck, Building2, Users, MessageCircle, ClipboardList,
-  BarChart3, Grid3x3, GraduationCap, Wrench, FileText, Menu
+  BarChart3, Grid3x3, GraduationCap, Wrench, FileText, Menu, ArrowLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,14 @@ export default function CopsoqLayout() {
 
   const NavContent = () => (
     <nav className="flex flex-col gap-0.5 p-4">
+      <Link
+        to="/"
+        onClick={() => setOpen(false)}
+        className="flex items-center gap-2 px-3 py-2 mb-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Voltar ao WebDeck
+      </Link>
       <div className="flex items-center gap-3 px-3 py-5 mb-4 border-b border-border">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
           <ShieldCheck className="h-5 w-5 text-primary-foreground" />
