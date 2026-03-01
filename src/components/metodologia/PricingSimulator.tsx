@@ -20,10 +20,7 @@ const PLANS = [
     tagline: "Mensurar + Resultados",
     icon: <Zap size={20} />,
     color: "hsl(210 75% 60%)",
-    colorClass: "text-cycle-mensurar",
-    borderClass: "border-cycle-mensurar/40",
-    bgClass: "bg-cycle-mensurar/10",
-    glowClass: "shadow-[0_0_30px_hsl(210_75%_60%/0.15)]",
+    accentHsl: "210 75% 60%",
     basePerPerson: 12.9,
     features: [
       { label: "COPSOQ III — survey + chatbot EliAs", included: true },
@@ -44,10 +41,7 @@ const PLANS = [
     tagline: "Core + Educar + Transformar",
     icon: <Rocket size={20} />,
     color: "hsl(38 85% 55%)",
-    colorClass: "text-accent",
-    borderClass: "border-accent/40",
-    bgClass: "bg-accent/10",
-    glowClass: "shadow-[0_0_30px_hsl(38_85%_55%/0.15)]",
+    accentHsl: "38 85% 55%",
     basePerPerson: 24.9,
     popular: true,
     features: [
@@ -69,10 +63,7 @@ const PLANS = [
     tagline: "Full Stack + Evoluir + ESG + CS",
     icon: <Crown size={20} />,
     color: "hsl(174 65% 45%)",
-    colorClass: "text-primary",
-    borderClass: "border-primary/40",
-    bgClass: "bg-primary/10",
-    glowClass: "shadow-[0_0_30px_hsl(174_65%_45%/0.15)]",
+    accentHsl: "174 65% 45%",
     basePerPerson: 39.9,
     features: [
       { label: "COPSOQ III — survey + chatbot EliAs", included: true },
@@ -173,7 +164,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
   const selectedPlanObj = PLANS.find(p => p.id === selectedPlan)!;
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-10 px-4 sm:px-6">
+    <div className="w-full max-w-6xl mx-auto space-y-10 px-4 sm:px-6">
       {/* ── HEADLINE ── */}
       <div className="text-center space-y-3">
         <motion.div
@@ -186,7 +177,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
             Investimento por pessoa · transparente
           </span>
         </motion.div>
-        <h3 className="text-2xl md:text-3xl font-bold leading-tight">
+        <h3 className="text-2xl md:text-3xl font-bold leading-tight text-foreground">
           Quanto custa cuidar de{" "}
           <span className="text-gradient-primary">{headcount.toLocaleString("pt-BR")}</span>{" "}
           pessoas?
@@ -201,7 +192,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users size={16} className="text-primary" />
-            <span className="text-sm font-medium">Colaboradores</span>
+            <span className="text-sm font-medium text-foreground">Colaboradores</span>
           </div>
           <motion.div
             key={headcount}
@@ -239,7 +230,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
 
       {/* ── BILLING TOGGLE ── */}
       <div className="flex items-center justify-center">
-        <div className="inline-flex items-center gap-1 rounded-full bg-muted/30 p-1 border border-border/40">
+        <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 border border-border">
           <button
             onClick={() => setIsAnnual(false)}
             className={`text-xs px-5 py-2 rounded-full transition-all font-medium ${
@@ -267,7 +258,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
       </div>
 
       {/* ── PLAN CARDS ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
         {PLANS.map((plan, i) => {
           const price = prices[i];
           const isSelected = selectedPlan === plan.id;
@@ -277,89 +268,116 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
               onClick={() => setSelectedPlan(plan.id)}
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.98 }}
-              className={`
-                relative flex flex-col text-left rounded-2xl border transition-all duration-300 cursor-pointer
-                p-6 sm:p-7
-                ${isSelected
-                  ? `${plan.borderClass} ${plan.bgClass} ${plan.glowClass} ring-1 ring-inset ring-white/5`
-                  : "border-border/30 bg-card/40 hover:border-border/60"
-                }
-              `}
+              className="relative flex flex-col text-left rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden"
+              style={{
+                borderColor: isSelected ? plan.color : "hsl(var(--border))",
+                background: isSelected
+                  ? `linear-gradient(165deg, hsl(${plan.accentHsl} / 0.08) 0%, hsl(var(--card)) 40%)`
+                  : "hsl(var(--card))",
+                boxShadow: isSelected
+                  ? `0 0 40px hsl(${plan.accentHsl} / 0.12), 0 8px 32px hsl(${plan.accentHsl} / 0.08)`
+                  : "var(--shadow-card)",
+              }}
               aria-pressed={isSelected}
               aria-label={`Plano ${plan.name}: ${formatBRL(price.perPerson)} por pessoa/mês`}
             >
               {"popular" in plan && plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                  <Badge className="bg-accent text-accent-foreground text-[10px] font-bold shadow-lg gap-1 px-3">
-                    <Sparkles size={10} /> Mais popular
-                  </Badge>
-                </div>
+                <div className="absolute -top-px left-0 right-0 h-1 bg-accent" />
               )}
 
-              {/* Header */}
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`p-2 rounded-lg ${plan.bgClass} ${plan.colorClass}`}>
-                  {plan.icon}
-                </div>
-                <div>
-                  <h4 className="font-bold text-base leading-tight">{plan.name}</h4>
-                  <p className="text-xs text-muted-foreground leading-snug mt-0.5">{plan.tagline}</p>
-                </div>
-              </div>
+              <div className="p-6 sm:p-7 flex flex-col flex-1">
+                {/* Popular badge */}
+                {"popular" in plan && plan.popular && (
+                  <div className="mb-4">
+                    <Badge className="bg-accent text-accent-foreground text-[10px] font-bold shadow-sm gap-1 px-3">
+                      <Sparkles size={10} /> Mais popular
+                    </Badge>
+                  </div>
+                )}
 
-              {/* Price */}
-              <div className="mb-5 pb-5 border-b border-border/20">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`${price.perPerson}-${plan.id}`}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.2 }}
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div
+                    className="p-2.5 rounded-xl"
+                    style={{
+                      background: `hsl(${plan.accentHsl} / 0.12)`,
+                      color: plan.color,
+                    }}
                   >
-                    <div className="flex items-baseline gap-1.5">
-                      <span className={`text-3xl font-bold tabular-nums ${plan.colorClass}`}>
-                        {formatBRL(price.perPerson)}
+                    {plan.icon}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-base text-foreground leading-tight">{plan.name}</h4>
+                    <p className="text-xs text-muted-foreground leading-snug mt-0.5">{plan.tagline}</p>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="mb-6 pb-5 border-b border-border">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`${price.perPerson}-${plan.id}`}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="flex items-baseline gap-1.5">
+                        <span
+                          className="text-3xl font-extrabold tabular-nums"
+                          style={{ color: plan.color }}
+                        >
+                          {formatBRL(price.perPerson)}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground mt-1 block">/pessoa/mês</span>
+                    </motion.div>
+                  </AnimatePresence>
+                  {price.discountPct > 0 && (
+                    <p className="text-xs text-copsoq-salus mt-3 flex items-center gap-1 font-medium">
+                      <TrendingDown size={12} /> {price.discountPct}% de economia aplicada
+                    </p>
+                  )}
+                </div>
+
+                {/* Features */}
+                <div className="space-y-3 flex-1 mb-6">
+                  {plan.features.map(f => (
+                    <div
+                      key={f.label}
+                      className="flex items-start gap-2.5 text-[13px] leading-relaxed"
+                    >
+                      {f.included ? (
+                        <CheckCircle2
+                          size={15}
+                          className="shrink-0 mt-0.5"
+                          style={{ color: plan.color }}
+                        />
+                      ) : (
+                        <X size={15} className="shrink-0 mt-0.5 text-muted-foreground/30" />
+                      )}
+                      <span className={f.included ? "text-foreground" : "text-muted-foreground/40 line-through"}>
+                        {f.label}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">/pessoa/mês</span>
-                  </motion.div>
-                </AnimatePresence>
-                {price.discountPct > 0 && (
-                  <p className="text-xs text-copsoq-salus mt-2 flex items-center gap-1">
-                    <TrendingDown size={12} /> {price.discountPct}% de economia aplicada
-                  </p>
-                )}
-              </div>
+                  ))}
+                </div>
 
-              {/* Features */}
-              <div className="space-y-2.5 flex-1 mb-6">
-                {plan.features.map(f => (
-                  <div
-                    key={f.label}
-                    className={`flex items-start gap-2.5 text-xs leading-relaxed ${
-                      f.included ? "text-foreground/80" : "text-muted-foreground/40"
-                    }`}
-                  >
-                    {f.included ? (
-                      <CheckCircle2 size={14} className={`${plan.colorClass} shrink-0 mt-0.5`} />
-                    ) : (
-                      <X size={14} className="shrink-0 mt-0.5 opacity-40" />
-                    )}
-                    <span className={!f.included ? "line-through" : ""}>{f.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* CTA */}
-              <div
-                className={`w-full py-2.5 rounded-xl text-center text-sm font-semibold transition-colors mt-auto ${
-                  isSelected
-                    ? `${plan.bgClass} ${plan.colorClass} ring-1 ring-inset ring-current/10`
-                    : "bg-muted/30 text-muted-foreground"
-                }`}
-              >
-                {isSelected ? "✓ Selecionado" : "Selecionar"}
+                {/* CTA */}
+                <div
+                  className="w-full py-3 rounded-xl text-center text-sm font-semibold transition-all mt-auto"
+                  style={isSelected ? {
+                    background: `hsl(${plan.accentHsl} / 0.15)`,
+                    color: plan.color,
+                    border: `1px solid hsl(${plan.accentHsl} / 0.25)`,
+                  } : {
+                    background: "hsl(var(--muted))",
+                    color: "hsl(var(--muted-foreground))",
+                    border: "1px solid transparent",
+                  }}
+                >
+                  {isSelected ? "✓ Selecionado" : "Selecionar"}
+                </div>
               </div>
             </motion.button>
           );
@@ -374,149 +392,158 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.3 }}
-          className={`rounded-2xl border p-6 sm:p-8 space-y-6 ${selectedPlanObj.borderClass} ${selectedPlanObj.bgClass}`}
+          className="rounded-2xl border-2 overflow-hidden"
+          style={{
+            borderColor: selectedPlanObj.color,
+            background: `linear-gradient(165deg, hsl(${selectedPlanObj.accentHsl} / 0.06) 0%, hsl(var(--card)) 30%)`,
+          }}
           role="region"
           aria-live="polite"
           aria-label="Resumo da simulação"
         >
-          {/* Summary header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div className="space-y-1.5">
-              <p className="text-xs text-muted-foreground">
-                Plano {selectedPlanObj.name} · {headcount.toLocaleString("pt-BR")} pessoas · {isAnnual ? "Anual" : "Mensal"}
-              </p>
-              <div className="flex items-baseline gap-2">
-                <span className={`text-4xl font-bold tabular-nums ${selectedPlanObj.colorClass}`}>
-                  {formatBRL(selectedPrice.monthly)}
-                </span>
-                <span className="text-sm text-muted-foreground">/mês</span>
-              </div>
-              {selectedPrice.savings > 0 && (
-                <p className="text-xs text-copsoq-salus flex items-center gap-1">
-                  <TrendingDown size={12} /> Economia de {formatBRL(selectedPrice.savings)}/mês vs. preço base
+          <div className="p-6 sm:p-8 space-y-6">
+            {/* Summary header */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground font-medium tracking-wide uppercase">
+                  Plano {selectedPlanObj.name} · {headcount.toLocaleString("pt-BR")} pessoas · {isAnnual ? "Anual" : "Mensal"}
                 </p>
-              )}
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className="text-4xl font-extrabold tabular-nums"
+                    style={{ color: selectedPlanObj.color }}
+                  >
+                    {formatBRL(selectedPrice.monthly)}
+                  </span>
+                  <span className="text-sm text-muted-foreground font-medium">/mês</span>
+                </div>
+                {selectedPrice.savings > 0 && (
+                  <p className="text-xs text-copsoq-salus flex items-center gap-1 font-medium">
+                    <TrendingDown size={12} /> Economia de {formatBRL(selectedPrice.savings)}/mês vs. preço base
+                  </p>
+                )}
+              </div>
+              <div className="sm:text-right space-y-1">
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Investimento anual</p>
+                <p className="text-2xl font-bold tabular-nums text-foreground">{formatBRL(selectedPrice.annual)}</p>
+              </div>
             </div>
-            <div className="sm:text-right space-y-0.5">
-              <p className="text-xs text-muted-foreground">Investimento anual</p>
-              <p className="text-xl font-bold tabular-nums">{formatBRL(selectedPrice.annual)}</p>
-            </div>
-          </div>
 
-          {/* Charts grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Monthly comparison chart */}
-            <div className="rounded-xl bg-background/30 border border-border/20 p-5">
-              <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5 font-medium">
-                <BarChart3 size={12} /> Comparativo mensal
+            {/* Charts grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Monthly comparison chart */}
+              <div className="rounded-xl bg-background border border-border p-5">
+                <p className="text-xs text-foreground mb-4 flex items-center gap-1.5 font-semibold">
+                  <BarChart3 size={12} className="text-muted-foreground" /> Comparativo mensal
+                </p>
+                <ResponsiveContainer width="100%" height={150}>
+                  <BarChart data={chartData} barSize={36}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis hide />
+                    <ReTooltip
+                      contentStyle={{
+                        background: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: 10,
+                        fontSize: 12,
+                        color: "hsl(var(--foreground))",
+                        padding: "8px 12px",
+                      }}
+                      formatter={(v: number) => formatBRL(v)}
+                      labelStyle={{ marginBottom: 4, fontWeight: 600 }}
+                    />
+                    <Bar dataKey="investimento" radius={[6, 6, 0, 0]}>
+                      {chartData.map((entry, idx) => (
+                        <Cell
+                          key={idx}
+                          fill={entry.color}
+                          opacity={PLANS[idx].id === selectedPlan ? 1 : 0.25}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Volume discount chart */}
+              <div className="rounded-xl bg-background border border-border p-5">
+                <p className="text-xs text-foreground mb-4 flex items-center gap-1.5 font-semibold">
+                  <TrendingDown size={12} className="text-muted-foreground" /> Escala de descontos por volume
+                </p>
+                <ResponsiveContainer width="100%" height={150}>
+                  <BarChart data={savingsChartData} barSize={24}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis hide />
+                    <ReTooltip
+                      contentStyle={{
+                        background: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: 10,
+                        fontSize: 12,
+                        color: "hsl(var(--foreground))",
+                        padding: "8px 12px",
+                      }}
+                      formatter={(v: number) => `${v}%`}
+                      labelStyle={{ marginBottom: 4, fontWeight: 600 }}
+                    />
+                    <Bar dataKey="desconto" radius={[4, 4, 0, 0]}>
+                      {savingsChartData.map((entry, idx) => (
+                        <Cell
+                          key={idx}
+                          fill={entry.active ? "hsl(152 60% 42%)" : "hsl(var(--muted))"}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Trust badges */}
+            <div className="flex flex-wrap gap-2.5 pt-1">
+              {[
+                { icon: ShieldCheck, label: "Sem exposição individual" },
+                { icon: ShieldCheck, label: "LGPD by design" },
+                { icon: ShieldCheck, label: "Audit-ready" },
+              ].map(({ icon: Icon, label }) => (
+                <Badge
+                  key={label}
+                  variant="outline"
+                  className="border-border text-foreground/70 text-[11px] gap-1.5 px-3 py-1.5"
+                >
+                  <Icon size={11} /> {label}
+                </Badge>
+              ))}
+            </div>
+
+            {/* Disclaimer */}
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border">
+              <Info size={14} className="text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Estimativa orientativa. Valores por pessoa/mês sujeitos a ajuste conforme escopo, integrações, governança e negociação. A proposta final é validada na demonstração.
               </p>
-              <ResponsiveContainer width="100%" height={140}>
-                <BarChart data={chartData} barSize={36}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(210 20% 18%)" vertical={false} />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 11, fill: "hsl(210 20% 55%)" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis hide />
-                  <ReTooltip
-                    contentStyle={{
-                      background: "hsl(210 25% 12%)",
-                      border: "1px solid hsl(210 20% 22%)",
-                      borderRadius: 10,
-                      fontSize: 12,
-                      color: "hsl(210 20% 90%)",
-                      padding: "8px 12px",
-                    }}
-                    formatter={(v: number) => formatBRL(v)}
-                    labelStyle={{ marginBottom: 4, fontWeight: 600 }}
-                  />
-                  <Bar dataKey="investimento" radius={[6, 6, 0, 0]}>
-                    {chartData.map((entry, idx) => (
-                      <Cell
-                        key={idx}
-                        fill={entry.color}
-                        opacity={PLANS[idx].id === selectedPlan ? 1 : 0.25}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
             </div>
 
-            {/* Volume discount chart */}
-            <div className="rounded-xl bg-background/30 border border-border/20 p-5">
-              <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5 font-medium">
-                <TrendingDown size={12} /> Escala de descontos por volume
-              </p>
-              <ResponsiveContainer width="100%" height={140}>
-                <BarChart data={savingsChartData} barSize={24}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(210 20% 18%)" vertical={false} />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 10, fill: "hsl(210 20% 50%)" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis hide />
-                  <ReTooltip
-                    contentStyle={{
-                      background: "hsl(210 25% 12%)",
-                      border: "1px solid hsl(210 20% 22%)",
-                      borderRadius: 10,
-                      fontSize: 12,
-                      color: "hsl(210 20% 90%)",
-                      padding: "8px 12px",
-                    }}
-                    formatter={(v: number) => `${v}%`}
-                    labelStyle={{ marginBottom: 4, fontWeight: 600 }}
-                  />
-                  <Bar dataKey="desconto" radius={[4, 4, 0, 0]}>
-                    {savingsChartData.map((entry, idx) => (
-                      <Cell
-                        key={idx}
-                        fill={entry.active ? "hsl(152 60% 42%)" : "hsl(210 20% 22%)"}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {/* CTA */}
+            <Button
+              onClick={onRequestProposal}
+              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold h-12 text-sm gap-2 shadow-lg shadow-accent/20 rounded-xl"
+            >
+              Solicitar proposta personalizada <ArrowRight size={16} />
+            </Button>
           </div>
-
-          {/* Trust badges */}
-          <div className="flex flex-wrap gap-2.5 pt-1">
-            {[
-              { icon: ShieldCheck, label: "Sem exposição individual" },
-              { icon: ShieldCheck, label: "LGPD by design" },
-              { icon: ShieldCheck, label: "Audit-ready" },
-            ].map(({ icon: Icon, label }) => (
-              <Badge
-                key={label}
-                variant="outline"
-                className="border-border/40 text-muted-foreground text-[11px] gap-1.5 px-3 py-1"
-              >
-                <Icon size={11} /> {label}
-              </Badge>
-            ))}
-          </div>
-
-          {/* Disclaimer */}
-          <div className="flex items-start gap-3 p-4 rounded-xl bg-background/20 border border-border/20">
-            <Info size={14} className="text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Estimativa orientativa. Valores por pessoa/mês sujeitos a ajuste conforme escopo, integrações, governança e negociação. A proposta final é validada na demonstração.
-            </p>
-          </div>
-
-          {/* CTA */}
-          <Button
-            onClick={onRequestProposal}
-            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold h-12 text-sm gap-2 shadow-lg shadow-accent/20 rounded-xl"
-          >
-            Solicitar proposta personalizada <ArrowRight size={16} />
-          </Button>
         </motion.div>
       </AnimatePresence>
     </div>
