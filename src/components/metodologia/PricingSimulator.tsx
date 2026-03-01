@@ -5,78 +5,84 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
   CheckCircle2, X, Zap, Crown, Rocket, Users, TrendingDown,
-  ArrowRight, ShieldCheck, Sparkles, BarChart3, Info
+  ArrowRight, ShieldCheck, Sparkles, BarChart3, Info, Star
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip,
   ResponsiveContainer, Cell, CartesianGrid
 } from "recharts";
 
+/* ── FEATURE GROUPS for scanning ── */
+const FEATURE_GROUPS = [
+  {
+    group: "Mensurar",
+    color: "210 75% 60%",
+    features: [
+      "COPSOQ III — survey + chatbot EliAs",
+      "Dashboard de riscos psicossociais",
+      "MTR-F (Matriz Risco-Florescimento)",
+      "Relatório agregado por segmento",
+    ],
+  },
+  {
+    group: "Educar + Transformar",
+    color: "38 85% 55%",
+    features: [
+      "Trilhas Educar (microlearning)",
+      "Backlog de intervenções (ILI)",
+    ],
+  },
+  {
+    group: "Evoluir + ESG",
+    color: "174 65% 45%",
+    features: [
+      "Relatório ESG trimestral",
+      "QBR + re-medição + governança",
+      "CS dedicado + integrações",
+    ],
+  },
+];
+
+const ALL_FEATURES = FEATURE_GROUPS.flatMap(g => g.features);
+
 /* ── CONFIG-DRIVEN PRICING ── */
 const PLANS = [
   {
     id: "core",
     name: "Core",
-    tagline: "Mensurar + Resultados",
-    icon: <Zap size={20} />,
+    tagline: "Diagnóstico completo",
+    subtitle: "Mensurar + Resultados",
+    icon: <Zap size={22} />,
     color: "hsl(210 75% 60%)",
     accentHsl: "210 75% 60%",
     basePerPerson: 12.9,
-    features: [
-      { label: "COPSOQ III — survey + chatbot EliAs", included: true },
-      { label: "Dashboard de riscos psicossociais", included: true },
-      { label: "MTR-F (Matriz Risco-Florescimento)", included: true },
-      { label: "Relatório agregado por segmento", included: true },
-      { label: "Trilhas Educar (microlearning)", included: false },
-      { label: "Backlog de intervenções (ILI)", included: false },
-      { label: "Relatório ESG trimestral", included: false },
-      { label: "QBR + re-medição + governança", included: false },
-      { label: "CS dedicado + integrações", included: false },
-    ],
-    cta: "Começar com Core",
+    includedCount: 4,
+    tier: 1,
   },
   {
     id: "growth",
     name: "Growth",
-    tagline: "Core + Educar + Transformar",
-    icon: <Rocket size={20} />,
+    tagline: "Mais escolhido",
+    subtitle: "Core + Educar + Transformar",
+    icon: <Rocket size={22} />,
     color: "hsl(38 85% 55%)",
     accentHsl: "38 85% 55%",
     basePerPerson: 24.9,
     popular: true,
-    features: [
-      { label: "COPSOQ III — survey + chatbot EliAs", included: true },
-      { label: "Dashboard de riscos psicossociais", included: true },
-      { label: "MTR-F (Matriz Risco-Florescimento)", included: true },
-      { label: "Relatório agregado por segmento", included: true },
-      { label: "Trilhas Educar (microlearning)", included: true },
-      { label: "Backlog de intervenções (ILI)", included: true },
-      { label: "Relatório ESG trimestral", included: false },
-      { label: "QBR + re-medição + governança", included: false },
-      { label: "CS dedicado + integrações", included: false },
-    ],
-    cta: "Escolher Growth",
+    includedCount: 6,
+    tier: 2,
   },
   {
     id: "enterprise",
     name: "Enterprise",
-    tagline: "Full Stack + Evoluir + ESG + CS",
-    icon: <Crown size={20} />,
+    tagline: "Ciclo completo",
+    subtitle: "Full Stack + Evoluir + ESG + CS",
+    icon: <Crown size={22} />,
     color: "hsl(174 65% 45%)",
     accentHsl: "174 65% 45%",
     basePerPerson: 39.9,
-    features: [
-      { label: "COPSOQ III — survey + chatbot EliAs", included: true },
-      { label: "Dashboard de riscos psicossociais", included: true },
-      { label: "MTR-F (Matriz Risco-Florescimento)", included: true },
-      { label: "Relatório agregado por segmento", included: true },
-      { label: "Trilhas Educar (microlearning)", included: true },
-      { label: "Backlog de intervenções (ILI)", included: true },
-      { label: "Relatório ESG trimestral", included: true },
-      { label: "QBR + re-medição + governança", included: true },
-      { label: "CS dedicado + integrações", included: true },
-    ],
-    cta: "Falar com Especialista",
+    includedCount: 9,
+    tier: 3,
   },
 ] as const;
 
@@ -182,7 +188,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
           <span className="text-gradient-primary">{headcount.toLocaleString("pt-BR")}</span>{" "}
           pessoas?
         </h3>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+        <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
           Deslize para ajustar o número de colaboradores. Descontos progressivos aplicados automaticamente.
         </p>
       </div>
@@ -258,126 +264,185 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
       </div>
 
       {/* ── PLAN CARDS ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 items-stretch">
         {PLANS.map((plan, i) => {
           const price = prices[i];
           const isSelected = selectedPlan === plan.id;
+          const isEnterprise = plan.id === "enterprise";
+          const isPopular = "popular" in plan && plan.popular;
+
           return (
             <motion.button
               key={plan.id}
               onClick={() => setSelectedPlan(plan.id)}
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -6, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="relative flex flex-col text-left rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden"
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className={`
+                relative flex flex-col text-left transition-all duration-300 cursor-pointer overflow-hidden
+                ${i === 0 ? "rounded-l-2xl md:rounded-r-none rounded-2xl md:rounded-bl-2xl" : ""}
+                ${i === 1 ? "rounded-none md:-mx-px z-10 rounded-2xl md:rounded-none" : ""}
+                ${i === 2 ? "rounded-r-2xl md:rounded-l-none rounded-2xl md:rounded-br-2xl" : ""}
+              `}
               style={{
-                borderColor: isSelected ? plan.color : "hsl(var(--border))",
-                background: isSelected
-                  ? `linear-gradient(165deg, hsl(${plan.accentHsl} / 0.08) 0%, hsl(var(--card)) 40%)`
-                  : "hsl(var(--card))",
+                border: isSelected ? `2px solid ${plan.color}` : "1px solid hsl(var(--border))",
+                background: isEnterprise
+                  ? `linear-gradient(170deg, hsl(${plan.accentHsl} / 0.04) 0%, hsl(var(--card)) 25%, hsl(var(--card)) 85%, hsl(${plan.accentHsl} / 0.06) 100%)`
+                  : isSelected
+                    ? `linear-gradient(170deg, hsl(${plan.accentHsl} / 0.06) 0%, hsl(var(--card)) 35%)`
+                    : "hsl(var(--card))",
                 boxShadow: isSelected
-                  ? `0 0 40px hsl(${plan.accentHsl} / 0.12), 0 8px 32px hsl(${plan.accentHsl} / 0.08)`
-                  : "var(--shadow-card)",
+                  ? `0 8px 40px hsl(${plan.accentHsl} / 0.15), 0 0 0 1px hsl(${plan.accentHsl} / 0.1)`
+                  : isPopular
+                    ? `0 4px 20px hsl(${plan.accentHsl} / 0.08)`
+                    : "none",
               }}
               aria-pressed={isSelected}
               aria-label={`Plano ${plan.name}: ${formatBRL(price.perPerson)} por pessoa/mês`}
             >
-              {"popular" in plan && plan.popular && (
-                <div className="absolute -top-px left-0 right-0 h-1 bg-accent" />
-              )}
+              {/* Top accent bar */}
+              <div
+                className="h-1.5 w-full shrink-0"
+                style={{ background: isSelected || isPopular ? plan.color : "transparent" }}
+              />
 
-              <div className="p-6 sm:p-7 flex flex-col flex-1">
-                {/* Popular badge */}
-                {"popular" in plan && plan.popular && (
-                  <div className="mb-4">
-                    <Badge className="bg-accent text-accent-foreground text-[10px] font-bold shadow-sm gap-1 px-3">
-                      <Sparkles size={10} /> Mais popular
-                    </Badge>
-                  </div>
-                )}
-
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-5">
-                  <div
-                    className="p-2.5 rounded-xl"
-                    style={{
-                      background: `hsl(${plan.accentHsl} / 0.12)`,
-                      color: plan.color,
-                    }}
-                  >
-                    {plan.icon}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-base text-foreground leading-tight">{plan.name}</h4>
-                    <p className="text-xs text-muted-foreground leading-snug mt-0.5">{plan.tagline}</p>
+              <div className="p-6 lg:p-7 flex flex-col flex-1">
+                {/* Plan header — always visible */}
+                <div className="flex items-start justify-between mb-1">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="p-2.5 rounded-xl shrink-0"
+                      style={{
+                        background: `hsl(${plan.accentHsl} / 0.12)`,
+                        color: plan.color,
+                      }}
+                    >
+                      {plan.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg text-foreground leading-tight tracking-tight">
+                        {plan.name}
+                      </h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">{plan.subtitle}</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Price */}
+                {/* Badges */}
+                <div className="flex items-center gap-2 mt-3 mb-5 min-h-[24px]">
+                  {isPopular && (
+                    <Badge className="bg-accent text-accent-foreground text-[10px] font-bold shadow-sm gap-1 px-2.5 py-0.5">
+                      <Star size={10} className="fill-current" /> Mais popular
+                    </Badge>
+                  )}
+                  {isEnterprise && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-bold gap-1 px-2.5 py-0.5"
+                      style={{ borderColor: plan.color, color: plan.color }}
+                    >
+                      <Crown size={10} /> Full Stack
+                    </Badge>
+                  )}
+                  {price.discountPct > 0 && (
+                    <Badge className="bg-copsoq-salus/15 text-copsoq-salus border-copsoq-salus/25 text-[10px] gap-1 px-2 py-0.5">
+                      <TrendingDown size={10} /> -{price.discountPct}%
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Price block — prominent */}
                 <div className="mb-6 pb-5 border-b border-border">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={`${price.perPerson}-${plan.id}`}
-                      initial={{ opacity: 0, y: 4 }}
+                      initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.25 }}
                     >
-                      <div className="flex items-baseline gap-1.5">
+                      <div className="flex items-baseline gap-1">
                         <span
-                          className="text-3xl font-extrabold tabular-nums"
+                          className="text-4xl font-extrabold tabular-nums tracking-tight"
                           style={{ color: plan.color }}
                         >
                           {formatBRL(price.perPerson)}
                         </span>
                       </div>
-                      <span className="text-xs text-muted-foreground mt-1 block">/pessoa/mês</span>
+                      <p className="text-xs text-muted-foreground mt-1.5 font-medium">
+                        por pessoa / mês
+                      </p>
                     </motion.div>
                   </AnimatePresence>
-                  {price.discountPct > 0 && (
-                    <p className="text-xs text-copsoq-salus mt-3 flex items-center gap-1 font-medium">
-                      <TrendingDown size={12} /> {price.discountPct}% de economia aplicada
-                    </p>
-                  )}
+                  <motion.p
+                    key={price.monthly}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-[11px] text-muted-foreground/70 mt-2 tabular-nums"
+                  >
+                    Total: {formatBRL(price.monthly)}/mês · {formatBRL(price.annual)}/ano
+                  </motion.p>
                 </div>
 
-                {/* Features */}
-                <div className="space-y-3 flex-1 mb-6">
-                  {plan.features.map(f => (
-                    <div
-                      key={f.label}
-                      className="flex items-start gap-2.5 text-[13px] leading-relaxed"
-                    >
-                      {f.included ? (
-                        <CheckCircle2
-                          size={15}
-                          className="shrink-0 mt-0.5"
-                          style={{ color: plan.color }}
-                        />
-                      ) : (
-                        <X size={15} className="shrink-0 mt-0.5 text-muted-foreground/30" />
-                      )}
-                      <span className={f.included ? "text-foreground" : "text-muted-foreground/40 line-through"}>
-                        {f.label}
-                      </span>
-                    </div>
-                  ))}
+                {/* Features — grouped for scanning */}
+                <div className="space-y-4 flex-1 mb-6">
+                  {FEATURE_GROUPS.map((group) => {
+                    const groupFeatures = group.features.map(f => {
+                      const idx = ALL_FEATURES.indexOf(f);
+                      return { label: f, included: idx < plan.includedCount };
+                    });
+                    const anyIncluded = groupFeatures.some(f => f.included);
+
+                    return (
+                      <div key={group.group}>
+                        <p
+                          className="text-[10px] font-bold uppercase tracking-widest mb-2"
+                          style={{ color: anyIncluded ? `hsl(${group.color})` : "hsl(var(--muted-foreground) / 0.4)" }}
+                        >
+                          {group.group}
+                        </p>
+                        <div className="space-y-2">
+                          {groupFeatures.map(f => (
+                            <div
+                              key={f.label}
+                              className="flex items-start gap-2.5 text-[13px] leading-relaxed"
+                            >
+                              {f.included ? (
+                                <CheckCircle2
+                                  size={15}
+                                  className="shrink-0 mt-0.5"
+                                  style={{ color: `hsl(${group.color})` }}
+                                />
+                              ) : (
+                                <X size={15} className="shrink-0 mt-0.5 text-muted-foreground/25" />
+                              )}
+                              <span className={f.included ? "text-foreground" : "text-muted-foreground/35 line-through"}>
+                                {f.label}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* CTA */}
-                <div
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                   className="w-full py-3 rounded-xl text-center text-sm font-semibold transition-all mt-auto"
                   style={isSelected ? {
-                    background: `hsl(${plan.accentHsl} / 0.15)`,
-                    color: plan.color,
-                    border: `1px solid hsl(${plan.accentHsl} / 0.25)`,
+                    background: plan.color,
+                    color: plan.id === "enterprise" ? "hsl(var(--primary-foreground))" : "hsl(var(--accent-foreground))",
+                    boxShadow: `0 4px 14px hsl(${plan.accentHsl} / 0.3)`,
                   } : {
                     background: "hsl(var(--muted))",
                     color: "hsl(var(--muted-foreground))",
-                    border: "1px solid transparent",
                   }}
                 >
                   {isSelected ? "✓ Selecionado" : "Selecionar"}
-                </div>
+                </motion.div>
               </div>
             </motion.button>
           );
@@ -388,29 +453,48 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
       <AnimatePresence mode="wait">
         <motion.div
           key={`${selectedPlan}-${headcount}-${isAnnual}`}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.3 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
           className="rounded-2xl border-2 overflow-hidden"
           style={{
             borderColor: selectedPlanObj.color,
-            background: `linear-gradient(165deg, hsl(${selectedPlanObj.accentHsl} / 0.06) 0%, hsl(var(--card)) 30%)`,
+            background: `linear-gradient(165deg, hsl(${selectedPlanObj.accentHsl} / 0.05) 0%, hsl(var(--card)) 25%)`,
           }}
           role="region"
           aria-live="polite"
           aria-label="Resumo da simulação"
         >
+          {/* Accent top bar */}
+          <div className="h-1 w-full" style={{ background: selectedPlanObj.color }} />
+
           <div className="p-6 sm:p-8 space-y-6">
             {/* Summary header */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
               <div className="space-y-2">
-                <p className="text-xs text-muted-foreground font-medium tracking-wide uppercase">
-                  Plano {selectedPlanObj.name} · {headcount.toLocaleString("pt-BR")} pessoas · {isAnnual ? "Anual" : "Mensal"}
-                </p>
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-center gap-3 mb-1">
+                  <div
+                    className="p-2 rounded-lg"
+                    style={{
+                      background: `hsl(${selectedPlanObj.accentHsl} / 0.12)`,
+                      color: selectedPlanObj.color,
+                    }}
+                  >
+                    {selectedPlanObj.icon}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-foreground">
+                      Plano {selectedPlanObj.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {headcount.toLocaleString("pt-BR")} pessoas · {isAnnual ? "Faturamento anual" : "Faturamento mensal"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2 mt-2">
                   <span
-                    className="text-4xl font-extrabold tabular-nums"
+                    className="text-4xl sm:text-5xl font-extrabold tabular-nums tracking-tight"
                     style={{ color: selectedPlanObj.color }}
                   >
                     {formatBRL(selectedPrice.monthly)}
@@ -418,14 +502,17 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
                   <span className="text-sm text-muted-foreground font-medium">/mês</span>
                 </div>
                 {selectedPrice.savings > 0 && (
-                  <p className="text-xs text-copsoq-salus flex items-center gap-1 font-medium">
+                  <p className="text-xs text-copsoq-salus flex items-center gap-1 font-medium mt-1">
                     <TrendingDown size={12} /> Economia de {formatBRL(selectedPrice.savings)}/mês vs. preço base
                   </p>
                 )}
               </div>
-              <div className="sm:text-right space-y-1">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Investimento anual</p>
-                <p className="text-2xl font-bold tabular-nums text-foreground">{formatBRL(selectedPrice.annual)}</p>
+              <div className="sm:text-right space-y-1 sm:min-w-[200px]">
+                <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Investimento anual</p>
+                <p className="text-3xl font-bold tabular-nums text-foreground">{formatBRL(selectedPrice.annual)}</p>
+                <p className="text-xs text-muted-foreground tabular-nums">
+                  {formatBRL(selectedPrice.perPerson)}/pessoa/mês
+                </p>
               </div>
             </div>
 
@@ -434,14 +521,14 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
               {/* Monthly comparison chart */}
               <div className="rounded-xl bg-background border border-border p-5">
                 <p className="text-xs text-foreground mb-4 flex items-center gap-1.5 font-semibold">
-                  <BarChart3 size={12} className="text-muted-foreground" /> Comparativo mensal
+                  <BarChart3 size={13} className="text-muted-foreground" /> Comparativo mensal por plano
                 </p>
-                <ResponsiveContainer width="100%" height={150}>
-                  <BarChart data={chartData} barSize={36}>
+                <ResponsiveContainer width="100%" height={160}>
+                  <BarChart data={chartData} barSize={40}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                     <XAxis
                       dataKey="name"
-                      tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                      tick={{ fontSize: 12, fill: "hsl(var(--foreground))", fontWeight: 500 }}
                       axisLine={false}
                       tickLine={false}
                     />
@@ -453,7 +540,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
                         borderRadius: 10,
                         fontSize: 12,
                         color: "hsl(var(--foreground))",
-                        padding: "8px 12px",
+                        padding: "10px 14px",
                       }}
                       formatter={(v: number) => formatBRL(v)}
                       labelStyle={{ marginBottom: 4, fontWeight: 600 }}
@@ -463,7 +550,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
                         <Cell
                           key={idx}
                           fill={entry.color}
-                          opacity={PLANS[idx].id === selectedPlan ? 1 : 0.25}
+                          opacity={PLANS[idx].id === selectedPlan ? 1 : 0.2}
                         />
                       ))}
                     </Bar>
@@ -474,10 +561,10 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
               {/* Volume discount chart */}
               <div className="rounded-xl bg-background border border-border p-5">
                 <p className="text-xs text-foreground mb-4 flex items-center gap-1.5 font-semibold">
-                  <TrendingDown size={12} className="text-muted-foreground" /> Escala de descontos por volume
+                  <TrendingDown size={13} className="text-muted-foreground" /> Escala de descontos por volume
                 </p>
-                <ResponsiveContainer width="100%" height={150}>
-                  <BarChart data={savingsChartData} barSize={24}>
+                <ResponsiveContainer width="100%" height={160}>
+                  <BarChart data={savingsChartData} barSize={28}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                     <XAxis
                       dataKey="name"
@@ -493,7 +580,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
                         borderRadius: 10,
                         fontSize: 12,
                         color: "hsl(var(--foreground))",
-                        padding: "8px 12px",
+                        padding: "10px 14px",
                       }}
                       formatter={(v: number) => `${v}%`}
                       labelStyle={{ marginBottom: 4, fontWeight: 600 }}
@@ -523,7 +610,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
                   variant="outline"
                   className="border-border text-foreground/70 text-[11px] gap-1.5 px-3 py-1.5"
                 >
-                  <Icon size={11} /> {label}
+                  <Icon size={12} /> {label}
                 </Badge>
               ))}
             </div>
@@ -539,7 +626,7 @@ export default function PricingSimulator({ onRequestProposal }: PricingSimulator
             {/* CTA */}
             <Button
               onClick={onRequestProposal}
-              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold h-12 text-sm gap-2 shadow-lg shadow-accent/20 rounded-xl"
+              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold h-13 text-base gap-2 shadow-lg shadow-accent/20 rounded-xl"
             >
               Solicitar proposta personalizada <ArrowRight size={16} />
             </Button>
