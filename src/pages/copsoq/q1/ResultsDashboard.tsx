@@ -5,8 +5,10 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie, Legend
 } from "recharts";
-import { BarChart3, TrendingUp, Users, AlertTriangle } from "lucide-react";
+import { BarChart3, TrendingUp, Users, AlertTriangle, GitBranch } from "lucide-react";
+import { lazy, Suspense } from "react";
 
+const WWPSystemGraph = lazy(() => import("@/components/copsoq/graph/WWPSystemGraph"));
 // TBD: placeholder data per R2
 const dimensionData = [
   { name: "Demandas Quantitativas", score: 72, band: "MODERADO" },
@@ -138,6 +140,31 @@ export default function ResultsDashboard() {
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+      {/* WWP System Graph — Interactive Dependency Map */}
+      <Card className="border border-border shadow-card">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+              <GitBranch className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-base">Grafo de Dependências — Work Wellbeing Playbook</CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                12 drivers + 7 mecanismos | 21 relações mapeadas | Tour pedagógico integrado
+              </p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={
+            <div className="w-full h-[600px] rounded-xl border border-border bg-muted/30 flex items-center justify-center">
+              <p className="text-sm text-muted-foreground animate-pulse">Carregando grafo interativo…</p>
+            </div>
+          }>
+            <WWPSystemGraph />
+          </Suspense>
         </CardContent>
       </Card>
     </div>
