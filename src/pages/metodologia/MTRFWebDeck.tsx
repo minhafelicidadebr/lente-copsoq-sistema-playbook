@@ -993,21 +993,37 @@ export default function MTRFWebDeck() {
         </SlideShell>
 
         {/* ═══════════════════ S16 — SIMULADOR DE PREÇO ═══════════════════ */}
-        <SlideShell id="s16-simulador-preco" variant="dark">
-          <div className="max-w-5xl mx-auto w-full">
-            <Badge className="bg-accent/15 text-accent border-accent/25 mb-4 text-[11px] uppercase tracking-wider">Investimento</Badge>
-            <h2 className="text-2xl md:text-3xl font-bold mb-1">Simule seu investimento</h2>
-            <p className="text-[hsl(210_20%_55%)] mb-6 text-xs">
-              Preço por pessoa com descontos progressivos por volume. Transparente e sem surpresas.
-            </p>
-            <PricingSimulator onRequestProposal={() => setFormOpen(true)} />
-            <div className="mt-4 text-center">
-              <button onClick={() => openModal("modal-preco-metodo")} className="text-xs text-[hsl(210_20%_50%)] hover:text-[hsl(210_20%_80%)] hover:underline inline-flex items-center gap-1">
-                <Eye size={12} /> Como calculamos (transparência)
-              </button>
-            </div>
+        <section
+          id="s16-simulador-preco"
+          className="deck-slide w-screen h-screen flex-shrink-0 snap-start snap-always relative flex items-center justify-center bg-[hsl(210_25%_8%)] text-[hsl(210_20%_95%)] overflow-y-auto"
+        >
+          <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 md:px-10 py-16 md:py-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="text-center mb-6">
+                <Badge className="bg-accent/15 text-accent border-accent/25 mb-3 text-[11px] uppercase tracking-wider">
+                  <Sparkles size={11} className="mr-1" /> Investimento
+                </Badge>
+                <h2 className="text-2xl md:text-3xl font-bold mb-1.5">
+                  Quanto custa cuidar de quem faz sua empresa funcionar?
+                </h2>
+                <p className="text-[hsl(210_20%_55%)] text-xs max-w-lg mx-auto">
+                  Preço por pessoa com descontos progressivos por volume. Transparente e sem surpresas.
+                </p>
+              </div>
+              <PricingSimulator onRequestProposal={() => setFormOpen(true)} />
+              <div className="mt-4 text-center">
+                <button onClick={() => openModal("modal-preco-metodo")} className="text-xs text-[hsl(210_20%_50%)] hover:text-[hsl(210_20%_80%)] hover:underline inline-flex items-center gap-1">
+                  <Eye size={12} /> Como calculamos (transparência)
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </SlideShell>
+        </section>
 
         {/* ═══════════════════ S17 — FINAL CTA ═══════════════════ */}
         <SlideShell id="s17-agendar-fechamento" variant="gradient">
