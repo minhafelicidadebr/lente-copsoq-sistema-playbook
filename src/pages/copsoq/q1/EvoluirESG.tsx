@@ -1,8 +1,16 @@
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Download, CheckCircle2, AlertTriangle, BarChart3, Shield, FileCheck } from "lucide-react";
+import {
+  FileText, Download, CheckCircle2, AlertTriangle,
+  BarChart3, Shield, FileCheck, Printer, Loader2,
+} from "lucide-react";
+import { buildCopsoqEsgReportSpec } from "@/lib/copsoq/q1/report/buildReport";
+import { renderReportHtml } from "@/lib/copsoq/q1/report/renderHtml";
+import type { CopsoqEsgReportSpec } from "@/lib/copsoq/q1/report/types";
+import ReportPreviewDialog from "@/components/copsoq/report/ReportPreviewDialog";
 
 const sections = [
   {
@@ -57,9 +65,67 @@ const annexes = [
   "Matriz ILI com justificativas",
 ];
 
+type ReportState =
+  | { status: "idle" }
+  | { status: "generating" }
+  | { status: "ready"; reportId: string; title: string; subtitle: string; html: string; spec: CopsoqEsgReportSpec };
+
 export default function EvoluirESG() {
+  const [state, setState] = useState<ReportState>({ status: "idle" });
+  const [open, setOpen] = useState(false);
+  const [lastReport, setLastReport] = useState<{ reportId: string } | null>(null);
+
+  const isBusy = state.status === "generating";
+
+  const handleExportPdf = useCallback(() => {
+    setState({ status: "generating" });
+    // Use setTimeout to let the UI update before heavy work
+    setTimeout(() => {
+      try {
+        const spec = buildCopsoqEsgReportSpec();
+        const html = renderReportHtml(spec);
+        setState({
+          status: "ready",
+          reportId: spec.reportId,
+          title: spec.branding.title,
+          subtitle: spec.branding.subtitle,
+          html,
+          spec,
+        });
+        setLastReport({ reportId: spec.reportId });
+        setOpen(true);
+      } catch (e) {
+        console.error("Erro ao gerar relatório:", e);
+        setState({ status: "idle" });
+      }
+    }, 80);
+  }, []);
+
+  const onPrint = useCallback(() => {
+    if (state.status !== "ready") return;
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(state.html);
+    win.document.close();
+    win.onload = () => {
+      win.print();
+    };
+  }, [state]);
+
+  const onDownloadHtml = useCallback(() => {
+    if (state.status !== "ready") return;
+    const blob = new Blob([state.html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio_esg_${state.reportId.slice(0, 8)}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [state]);
+
   return (
     <div className="space-y-8 animate-fade-in">
+      {/* Header with CTAs */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -70,11 +136,24 @@ export default function EvoluirESG() {
             COPSOQ (Compliance) · Blindagem & Consolidação · Com trilha de auditoria
           </p>
         </div>
-        <Button className="gap-2">
-          <Download className="h-4 w-4" /> Exportar PDF
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button className="gap-2" onClick={handleExportPdf} disabled={isBusy}>
+            {isBusy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {isBusy ? "Gerando…" : "Exportar PDF"}
+          </Button>
+          {lastReport?.reportId && (
+            <span className="text-[10px] text-muted-foreground font-mono">
+              Último gerado: {lastReport.reportId.slice(0, 8)}
+            </span>
+          )}
+        </div>
       </div>
 
+      {/* Compliance callout */}
       <div className="flex items-center gap-2 bg-copsoq-salus/10 border border-copsoq-salus/30 rounded-lg p-4">
         <Shield className="h-5 w-5 text-copsoq-salus flex-shrink-0" />
         <p className="text-sm text-foreground">
@@ -156,6 +235,21 @@ export default function EvoluirESG() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Report Preview Dialog */}
+      {state.status === "ready" && (
+        <ReportPreviewDialog
+          open={open}
+          onOpenChange={setOpen}
+          reportId={state.reportId}
+          reportTitle={state.title}
+          reportSubtitle={state.subtitle}
+          html={state.html}
+          onPrint={onPrint}
+          onDownloadHtml={onDownloadHtml}
+          statusBadges={["Audit-ready", "sem dados individuais", "TBD onde faltar dado"]}
+        />
+      )}
     </div>
   );
 }
