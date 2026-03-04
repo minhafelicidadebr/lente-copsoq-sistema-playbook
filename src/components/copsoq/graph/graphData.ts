@@ -180,9 +180,9 @@ export const GRAPH_EDGES: Array<{
 }> = [
   { id: "e1", source: "drv_management", target: "drv_trust", data: { relation: "enables", weight: 0.92, evidence_ids: ["MGT-01","TRU-01","COM-01"], rationale_short: "Gestão consistente e justa aumenta confiança e previsibilidade." }},
   { id: "e2", source: "drv_trust", target: "mech_psych_safety", data: { relation: "enables", weight: 0.9, evidence_ids: ["TRU-09","TRU-06"], rationale_short: "Confiança reduz medo de retaliação e abre espaço para aprender." }},
-  { id: "e3", source: "mech_psych_safety", target: "drv_inclusion", data: { relation: "enables", weight: 0.85, evidence_ids: ["INC-01","TRU-09"], rationale_short: "Com segurança, pessoas participam e são valorizadas em sua unicidade." }},
+  { id: "e3", source: "mech_psych_safety", target: "drv_inclusion_belonging", data: { relation: "enables", weight: 0.85, evidence_ids: ["INC-01","TRU-09"], rationale_short: "Com segurança, pessoas participam e são valorizadas em sua unicidade." }},
   { id: "e4", source: "drv_support", target: "drv_stress", data: { relation: "enables", weight: 0.78, evidence_ids: ["SUP-01","STR-05"], rationale_short: "Suporte funciona como amortecedor de demandas e reduz exaustão." }},
-  { id: "e5", source: "drv_flexibility", target: "drv_inclusion", data: { relation: "tradeoff", weight: 0.35, evidence_ids: ["FLX-03","INC-02"], rationale_short: "Flexibilidade sem governança pode reduzir pertencimento." }},
+  { id: "e5", source: "drv_flexibility", target: "drv_inclusion_belonging", data: { relation: "tradeoff", weight: 0.35, evidence_ids: ["FLX-03","INC-02"], rationale_short: "Flexibilidade sem governança pode reduzir pertencimento." }},
   { id: "e6", source: "drv_stress", target: "drv_energy", data: { relation: "enables", weight: 0.7, evidence_ids: ["STR-01","ENE-02"], rationale_short: "Menos estresse libera recuperação e melhora energia sustentada." }},
   { id: "e7", source: "drv_energy", target: "drv_learning", data: { relation: "enables", weight: 0.62, evidence_ids: ["ENE-01","LRN-03"], rationale_short: "Energia favorece atenção e prática — base para aprender." }},
   { id: "e8", source: "drv_learning", target: "drv_achievement", data: { relation: "enables", weight: 0.7, evidence_ids: ["LRN-04","ACH-01"], rationale_short: "Aprender e transferir competência aumenta realização de objetivos." }},
