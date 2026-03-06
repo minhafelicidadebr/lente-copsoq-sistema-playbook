@@ -26,6 +26,9 @@ import Educar from "@/pages/app/Educar";
 import Transformar from "@/pages/app/Transformar";
 import Evoluir from "@/pages/app/Evoluir";
 import EvidenceExplorer from "@/pages/app/EvidenceExplorer";
+import CopsoqSurveyChat from "@/pages/app/CopsoqSurveyChat";
+import CopsoqMyResults from "@/pages/app/CopsoqMyResults";
+import ManagerDashboard from "@/pages/app/ManagerDashboard";
 
 import CopsoqLayout from "./components/copsoq/CopsoqLayout";
 import Overview from "./pages/copsoq/q1/Overview";
