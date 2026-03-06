@@ -26,6 +26,9 @@ import Educar from "@/pages/app/Educar";
 import Transformar from "@/pages/app/Transformar";
 import Evoluir from "@/pages/app/Evoluir";
 import EvidenceExplorer from "@/pages/app/EvidenceExplorer";
+import CopsoqSurveyChat from "@/pages/app/CopsoqSurveyChat";
+import CopsoqMyResults from "@/pages/app/CopsoqMyResults";
+import ManagerDashboard from "@/pages/app/ManagerDashboard";
 
 import CopsoqLayout from "./components/copsoq/CopsoqLayout";
 import Overview from "./pages/copsoq/q1/Overview";
@@ -79,6 +82,9 @@ const App = () => (
               <Route path="transformar" element={<RequirePerm perm="VIEW_TRANSFORMAR"><Transformar /></RequirePerm>} />
               <Route path="evoluir" element={<RequirePerm perm="VIEW_EVOLUIR"><Evoluir /></RequirePerm>} />
               <Route path="evidence" element={<RequirePerm perm="VERIFY_EVIDENCE"><EvidenceExplorer /></RequirePerm>} />
+              <Route path="diagnostico" element={<CopsoqSurveyChat />} />
+              <Route path="meus-resultados" element={<CopsoqMyResults />} />
+              <Route path="dashboard-organizacional" element={<RequirePerm perm="VIEW_MENSURAR"><ManagerDashboard /></RequirePerm>} />
               <Route path="*" element={<Navigate to="/app" replace />} />
             </Route>
 
