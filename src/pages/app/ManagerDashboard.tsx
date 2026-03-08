@@ -232,10 +232,10 @@ export default function ManagerDashboard() {
               <Card className="border border-border shadow-card hover:shadow-card-hover transition-shadow">
                 <CardContent className="p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="text-[10px]">{trail.module}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">{trail.subtitle}</Badge>
                     <span className="text-xs text-muted-foreground">+{trail.xpReward} XP</span>
                   </div>
-                  <p className="text-sm font-semibold text-foreground">{trail.name}</p>
+                  <p className="text-sm font-semibold text-foreground">{trail.title}</p>
                   <p className="text-xs text-muted-foreground">{trail.description}</p>
                   <Button variant="outline" size="sm" className="w-full gap-1 text-xs" asChild>
                     <Link to="/app/educar">

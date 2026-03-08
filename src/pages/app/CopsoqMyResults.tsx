@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 import { Sparkles, TrendingUp, AlertTriangle, BookOpen, ArrowRight, Play, Shield } from "lucide-react";
 import { FACTORS } from "@/lib/copsoq/dimensions";
 import { computeResults, generateDemoResponses, type SurveyResult, type RiskBand } from "@/lib/copsoq/scoring";
-import { getRecommendedTrails, type LearningTrail } from "@/lib/copsoq/learningTrails";
+import { getRecommendedTrails, type LearningModule } from "@/lib/copsoq/learningTrails";
 
 const bandColor = (band: RiskBand) => {
   if (band === "ALTO") return "hsl(var(--copsoq-pathos))";
@@ -33,7 +33,7 @@ const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 export default function CopsoqMyResults() {
   const navigate = useNavigate();
   const [result, setResult] = useState<SurveyResult | null>(null);
-  const [trails, setTrails] = useState<LearningTrail[]>([]);
+  const [trails, setTrails] = useState<LearningModule[]>([]);
 
   useEffect(() => {
     const stored = localStorage.getItem("copsoq_result");
@@ -254,10 +254,10 @@ export default function CopsoqMyResults() {
               <Card className="border border-border shadow-card hover:shadow-card-hover transition-shadow h-full">
                 <CardContent className="p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="text-[10px]">{trail.module}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">{trail.subtitle}</Badge>
                     <span className="text-xs text-muted-foreground">+{trail.xpReward} XP</span>
                   </div>
-                  <p className="text-sm font-semibold text-foreground">{trail.name}</p>
+                  <p className="text-sm font-semibold text-foreground">{trail.title}</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">{trail.description}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Play className="h-3 w-3" />
