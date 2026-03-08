@@ -33,7 +33,7 @@ const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 export default function CopsoqMyResults() {
   const navigate = useNavigate();
   const [result, setResult] = useState<SurveyResult | null>(null);
-  const [trails, setTrails] = useState<LearningTrail[]>([]);
+  const [trails, setTrails] = useState<LearningModule[]>([]);
 
   useEffect(() => {
     const stored = localStorage.getItem("copsoq_result");
