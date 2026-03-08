@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 import { Sparkles, TrendingUp, AlertTriangle, BookOpen, ArrowRight, Play, Shield } from "lucide-react";
 import { FACTORS } from "@/lib/copsoq/dimensions";
 import { computeResults, generateDemoResponses, type SurveyResult, type RiskBand } from "@/lib/copsoq/scoring";
-import { getRecommendedTrails, type LearningTrail } from "@/lib/copsoq/learningTrails";
+import { getRecommendedTrails, type LearningModule } from "@/lib/copsoq/learningTrails";
 
 const bandColor = (band: RiskBand) => {
   if (band === "ALTO") return "hsl(var(--copsoq-pathos))";

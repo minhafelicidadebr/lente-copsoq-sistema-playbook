@@ -30,7 +30,7 @@ export default function EducarTrilhas() {
   });
 
   const role = user?.role;
-  const showManagerTab = role === "ADMIN" || role === "GESTOR_BEM_ESTAR" || role === "GESTOR_COMPLIANCE" || role === "COORDENADOR";
+  const showManagerTab = role === "ADMIN" || role === "GESTOR_BEM_ESTAR" || role === "GESTOR_COMPLIANCE" || role === "COORDENADOR_GERENTE";
 
   const modules = useMemo(() => (tab === "colaborador" ? COLLABORATOR_MODULES : MANAGER_MODULES), [tab]);
 
