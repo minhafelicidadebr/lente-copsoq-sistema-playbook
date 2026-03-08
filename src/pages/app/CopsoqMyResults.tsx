@@ -254,10 +254,10 @@ export default function CopsoqMyResults() {
               <Card className="border border-border shadow-card hover:shadow-card-hover transition-shadow h-full">
                 <CardContent className="p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="text-[10px]">{trail.module}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">{trail.subtitle}</Badge>
                     <span className="text-xs text-muted-foreground">+{trail.xpReward} XP</span>
                   </div>
-                  <p className="text-sm font-semibold text-foreground">{trail.name}</p>
+                  <p className="text-sm font-semibold text-foreground">{trail.title}</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">{trail.description}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Play className="h-3 w-3" />
